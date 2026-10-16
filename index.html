@@ -158,6 +158,10 @@ h3{font-family:var(--f-display);font-weight:400;font-size:1.3rem;margin:0 0 8px}
 .edit .clr{align-self:flex-end}
 .edit input.venue{width:180px;max-width:100%}
 
+/* Botón de descarga del calendario en PDF */
+.calendar-pdf{margin:12px 0 20px;display:flex;justify-content:center}
+.calendar-pdf-button{display:inline-block;padding:12px 20px;background:var(--yellow);color:var(--edge);border:3px solid var(--edge);border-radius:15px;box-shadow:4px 4px 0 var(--edge);font-weight:900;text-decoration:none;text-align:center}
+.calendar-pdf-button:hover{transform:translateY(-2px)}
 /* Calendario */
 .chips{display:flex;gap:8px;overflow-x:auto;padding:4px 6px 12px 2px;scrollbar-width:thin}
 .chips button{flex:0 0 auto;min-width:46px;height:46px;border-radius:14px;border:3px solid var(--edge);background:var(--card);font-family:var(--f-display);font-size:1.15rem;box-shadow:3px 3px 0 var(--edge);color:var(--ink)}
@@ -696,6 +700,9 @@ function viewInicio(){
   return h;
 }
 function viewCalendario(){
+  const enlacePDF = curComp().id === 'c1'
+    ? '<div class="calendar-pdf"><a href="Calendario_PequeFutbol_2026-27_con_fechas.pdf" download="Calendario_PequeFutbol_2026-27.pdf" class="calendar-pdf-button" aria-label="Descargar calendario completo de liga en PDF">⬇ Descargar calendario completo en PDF</a></div>'
+    : '';
   const n=nJ();if(!jsel||jsel>n)jsel=currentJ()||n||1;
   let h='<div class="tools"><label class="lb" for="tf">Ver</label><select id="tf"><option value="">'+(TYPES[state.type].unit==='Ronda'?'Una ronda':'Una jornada')+'</option>'+
     state.teams.filter(isPart).map(t=>'<option value="'+t.id+'"'+(tfilter===t.id?' selected':'')+'>Todos los partidos de '+esc(t.name)+'</option>').join('')+'</select></div>';
@@ -710,7 +717,7 @@ function viewCalendario(){
     const ms=state.matches.filter(m=>m.h===tfilter||m.a===tfilter);
     h+='<h2><span class="t">'+esc(team(tfilter).name)+'</span><small>'+ms.length+' partidos</small></h2><div class="list">'+ms.map(m=>matchHtml(m,true)).join('')+'</div>';
   }
-  return h;
+  return enlacePDF+h;
 }
 function tableHtml(rows,any){
   let h='<div class="tw"><table><thead><tr><th>#</th><th style="text-align:left">Equipo</th><th title="Jugados">PJ</th><th title="Ganados">G</th><th title="Empatados">E</th><th title="Perdidos">P</th><th class="hide-sm" title="Goles a favor">GF</th><th class="hide-sm" title="Goles en contra">GC</th><th title="Diferencia de goles">DG</th><th>Pts</th></tr></thead><tbody>';
