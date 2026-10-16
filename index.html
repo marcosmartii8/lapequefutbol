@@ -803,7 +803,7 @@ function viewEquipos(){
     const i=info[t.id],inC=i.comps.length>0;
     const canRm=state.teams.length>2&&state.comps.every(c=>!c.part.includes(t.id)||(c.part.length>2&&!lockedOf(c)));
     h+='<div class="team'+(inC?'':' off')+'"><div class="side">'+badge(t.id)+(ed?'<input class="tn" id="tn-'+t.id+'" aria-label="Nombre del equipo" data-team="'+t.id+'" value="'+esc(t.name)+'">':'<span class="nm">'+esc(t.name)+'</span>')+'</div>'+
-    '<div class="when" style="justify-content:flex-start">'+(inC?i.comps.map(n=>'<span class="chip j">'+esc(n)+'</span>').join(''):'<span class="chip">No participa en ninguna competición</span>')+'</div>'+
+    (ed?'<div class="when" style="justify-content:flex-start">'+(inC?i.comps.map(n=>'<span class="chip j">'+esc(n)+'</span>').join(''):'<span class="chip">No participa en ninguna competición</span>')+'</div>':'')+
     (inC?'<div class="meta">'+i.pj+' jugados · '+i.pts+' puntos</div><div class="meta">'+(i.nx||'Sin partidos pendientes')+'</div>':'')+
     (ed?'<div class="tools"><label class="file" for="cr-'+t.id+'">'+(t.crest?'Cambiar escudo':'Subir escudo')+'<input id="cr-'+t.id+'" type="file" accept="image/*" data-crest="'+t.id+'"></label>'+(t.crest?'<button class="mini" data-act="rmcrest" data-t="'+t.id+'">Quitar escudo</button>':'')+(canRm?'<button class="mini warn" data-act="rmteam" data-t="'+t.id+'">Quitar equipo</button>':'')+'</div>':'')+'</div>';
   });
