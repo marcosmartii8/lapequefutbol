@@ -580,6 +580,7 @@ function matchHtml(m,showJ){
     h+='<div class="edit"><label for="d-'+k+'">Día<input id="d-'+k+'" type="date" data-id="'+k+'" data-f="date" value="'+esc(m.date)+'"></label>'+
     '<label for="t-'+k+'">Hora<input id="t-'+k+'" type="time" data-id="'+k+'" data-f="time" value="'+esc(m.time)+'"></label>'+
     '<label for="v-'+k+'">Campo<input id="v-'+k+'" class="venue" type="text" data-id="'+k+'" data-f="venue" value="'+esc(m.venue)+'" placeholder="Pabellón o campo"></label>'+
+    (state.type==='ida_vuelta'?'<button type="button" class="mini" data-act="swaphome" data-id="'+k+'">⇄ Intercambiar local y visitante (ida y vuelta)</button>':'')+
     '<label for="hg-'+k+'">Goles local<input id="hg-'+k+'" type="number" min="0" max="99" data-id="'+k+'" data-f="hg" value="'+(m.hg==null?'':m.hg)+'"></label>'+
     '<label for="ag-'+k+'">Goles visitante<input id="ag-'+k+'" type="number" min="0" max="99" data-id="'+k+'" data-f="ag" value="'+(m.ag==null?'':m.ag)+'"></label>'+
     (isKO()&&draw?'<label for="pw-'+k+'">Penaltis<select id="pw-'+k+'" data-id="'+k+'" data-f="pw"><option value="">¿Quién pasa?</option><option value="h"'+(m.pw==='h'?' selected':'')+'>'+esc(team(m.h).name)+'</option><option value="a"'+(m.pw==='a'?' selected':'')+'>'+esc(team(m.a).name)+'</option></select></label>':'')+((m.date||m.time||m.venue)?'<button class="mini warn clr" data-act="clrsched" data-id="'+k+'">Quitar horario</button>':'')+'</div>';
@@ -864,6 +865,21 @@ $app.addEventListener('click',e=>{
   else if(act==='addteam'){const id=nextTeamId();state.teams.push({id:id,name:'Equipo '+id.slice(1)});if(state.comps.length===1&&!locked()){state.part=state.part.concat(id);regen();}touch();render();}
   else if(act==='rmteam'){const id=b.dataset.t;state.teams=state.teams.filter(t=>t.id!==id);state.comps.forEach(c=>{if(c.part.includes(id))inComp(c,()=>{state.part=state.part.filter(x=>x!==id);regen();});});touch();render();}
   else if(act==='rmcrest'){delete team(b.dataset.t).crest;touch();render();}
+  else if(act==='swaphome'){
+    const m=state.matches.find(x=>x.id===b.dataset.id);
+    if(!m||state.type!=='ida_vuelta')return;
+    const rivals=state.matches.filter(x=>x!==m&&x.h===m.a&&x.a===m.h);
+    if(rivals.length!==1){flash('No se ha encontrado una única vuelta para este partido. No se han realizado cambios.');return;}
+    const back=rivals[0];
+    if(played(m)||played(back)){flash('No se puede intercambiar una pareja con resultados. Revisa los marcadores antes de cambiar las localías.');return;}
+    if(!window.confirm('¿Intercambiar local y visitante en las jornadas '+m.j+' y '+back.j+'? Se conservarán fechas y horas, pero revisa los campos asignados.'))return;
+    for(const game of [m,back]){
+      const tmp=game.h;game.h=game.a;game.a=tmp;
+      const score=game.hg;game.hg=game.ag;game.ag=score;
+      if(game.pw==='h')game.pw='a';else if(game.pw==='a')game.pw='h';
+    }
+    touch();render();
+  }
   else if(act==='clrsched'){const m=state.matches.find(x=>x.id===b.dataset.id);if(m){m.date='';m.time='';m.venue='';touch();render();}}
   else if(act==='hist'){const k=b.dataset.k;openHist=openHist===k?'':k;render();}
   else if(act==='gotoclose'){tab='temporadas';closing=true;nname='';ntype=curComp().type;npart=allPartIds();ngroups=Math.min(4,state.comps.length);nrand=true;nweeks=state.weeks||0;render();window.scrollTo&&window.scrollTo({top:0});}
