@@ -645,10 +645,16 @@ function currentJ(){
   for(let j=1;j<=nJ();j++){if(state.matches.some(m=>m.j===j&&!played(m)))return j;}
   return null;
 }
+// Solo se destacan encuentros futuros con día y hora confirmados.
+// Se utiliza la hora local del navegador, sin depender de los resultados.
 function nextMatch(){
-  const t=todayStr();
-  const up=state.matches.filter(m=>!played(m)&&eff(m)&&eff(m)>=t).sort((a,b)=>(eff(a)+(a.time||'99:99')).localeCompare(eff(b)+(b.time||'99:99')));
-  return up[0]||state.matches.find(m=>!played(m))||null;
+  const now=new Date();
+  const up=state.matches.filter(m=>{
+    if(played(m)||!eff(m)||!/^\d{2}:\d{2}$/.test(m.time||''))return false;
+    const kickoff=new Date(eff(m)+'T'+m.time+':00');
+    return !Number.isNaN(kickoff.getTime())&&kickoff>now;
+  }).sort((a,b)=>(eff(a)+'T'+a.time).localeCompare(eff(b)+'T'+b.time));
+  return up[0]||null;
 }
 function tapeHtml(){
   const per=Math.max(3,Math.ceil(10/state.comps.length)),items=[];
@@ -662,7 +668,7 @@ function tapeHtml(){
   return '<div class="tape" role="marquee" aria-label="Próximos partidos"><div class="track" style="animation-duration:'+(items.length*8)+'s">'+one+one+'</div></div>';
 }
 function featureHtml(){
-  const m=nextMatch();if(!m)return '';
+  const m=nextMatch();if(!m)return '<section class="feature"><div class="f-top"><span class="stamp">Próximo partido</span></div><p style="margin:18px 0 4px;font-weight:800;text-align:center">Próximos partidos pendientes de confirmar</p></section>';
   let count='';
   if(eff(m)){const d=daysTo(eff(m));count=d<0?'Fecha pasada':d===0?'¡Hoy!':d===1?'Mañana':'Faltan '+d+' días';}
   let h='<section class="feature"><div class="f-top"><span class="stamp">Próximo partido · '+esc(shortRound(m.j))+'</span>'+(count?'<span class="count">'+count+'</span>':'')+'</div>';
@@ -1032,6 +1038,9 @@ async function publish(){
   }
 }
 render();
+// Refresca el próximo partido mientras la página permanece abierta.
+// No modifica datos ni obliga a publicar cambios.
+setInterval(()=>{if(tab==='inicio'&&!editMode&&!busy)render();},30000);
 (async()=>{
   try{
     if(!(window.claude&&window.claude.use))return;
