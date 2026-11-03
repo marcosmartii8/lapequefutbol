@@ -1176,6 +1176,25 @@ function activarAnalytics() {
 
 
 
+
+function eliminarCookiesAnalytics() {
+  const nombres = document.cookie
+    .split(';')
+    .map(cookie => cookie.split('=')[0].trim())
+    .filter(nombre =>
+      nombre === '_ga' || nombre.startsWith('_ga_')
+    );
+
+  nombres.forEach(nombre => {
+    document.cookie =
+      nombre + '=; Max-Age=0; path=/; domain=' +
+      location.hostname + '; SameSite=Lax';
+
+    document.cookie =
+      nombre + '=; Max-Age=0; path=/; SameSite=Lax';
+  });
+}
+
 function guardarCookies(aceptar) {
   localStorage.setItem(
     'pequefutbol_cookies',
@@ -1183,18 +1202,18 @@ function guardarCookies(aceptar) {
   );
 
   if (!aceptar) {
-    document.cookie.split(';').forEach(function(cookie) {
-      const nombre = cookie.split('=')[0].trim();
-
-      if (nombre === '_ga' || nombre.startsWith('_ga_')) {
-        document.cookie =
-          nombre + '=; Max-Age=0; path=/; SameSite=Lax';
-      }
+    gtag('consent', 'update', {
+      analytics_storage: 'denied'
     });
+
+    eliminarCookiesAnalytics();
   }
 
-  window.location.reload();
+  setTimeout(function() {
+    window.location.reload();
+  }, 300);
 }
+
 
 
 </script>
