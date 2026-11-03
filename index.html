@@ -1,6 +1,20 @@
 <!doctype html>
 <html lang="es">
 <head>
+  
+<!-- Google Analytics: consentimiento denegado por defecto -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+
+  gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied'
+  });
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
@@ -1085,4 +1099,123 @@ setInterval(()=>{if(tab==='inicio'&&!editMode&&!busy)render();},30000);
   try{const r=await window.fetch('data.json?v='+Date.now(),{cache:'no-store'});if(r.ok){loadState(await r.text());render();}}catch(e){}
 })();
 </script>
+
+<!-- Acceso a preferencias de cookies -->
+<button
+  type="button"
+  id="abrir-preferencias-cookies"
+  onclick="document.getElementById('aviso-cookies').style.display='block'"
+  style="position:fixed;bottom:10px;left:10px;z-index:99998;background:#fff;color:#222;border:1px solid #ccc;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer">
+  Configurar cookies
+</button>
+
+<!-- Aviso de cookies analíticas -->
+<div id="aviso-cookies" style="display:none;position:fixed;bottom:15px;left:15px;right:15px;max-width:560px;margin:auto;background:#fff;color:#222;padding:20px;border-radius:12px;box-shadow:0 4px 25px #0004;z-index:99999;font-family:Arial,sans-serif">
+  <strong>Cookies de Peque·Fútbol</strong>
+  
+<p>
+  Utilizamos cookies analíticas opcionales de Google Analytics
+  para conocer las visitas y mejorar Peque·Fútbol.
+  Puedes aceptarlas o rechazarlas.
+  Consulta nuestra
+  <a href="privacidad.html">Política de privacidad y cookies</a>.
+</p>
+
+  <button type="button" onclick="guardarCookies(true)">Aceptar</button>
+  <button type="button" onclick="guardarCookies(false)">Rechazar</button>
+</div>
+
+<script>
+(function () {
+  const eleccion = localStorage.getItem('pequefutbol_cookies');
+
+  window.gtag('consent', 'update', {
+    analytics_storage: eleccion === 'aceptadas' ? 'granted' : 'denied'
+  });
+  
+
+
+if (eleccion === 'aceptadas') {
+  activarAnalytics();
+}
+
+
+
+
+  if (eleccion === null) {
+    document.getElementById('aviso-cookies').style.display = 'block';
+  }
+})();
+
+
+function activarAnalytics() {
+  if (document.getElementById('script-google-analytics')) {
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.id = 'script-google-analytics';
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-1VW8RV270V';
+  script.async = true;
+
+  script.onload = function() {
+    gtag('js', new Date());
+    gtag('config', 'G-1VW8RV270V', {
+      send_page_view: false
+    });
+
+    gtag('event', 'page_view', {
+      page_title: document.title,
+      page_location: window.location.href
+    });
+  };
+
+  document.head.appendChild(script);
+}
+
+
+
+
+
+function eliminarCookiesAnalytics() {
+  const nombres = document.cookie
+    .split(';')
+    .map(cookie => cookie.split('=')[0].trim())
+    .filter(nombre =>
+      nombre === '_ga' || nombre.startsWith('_ga_')
+    );
+
+  nombres.forEach(nombre => {
+    document.cookie =
+      nombre + '=; Max-Age=0; path=/; domain=' +
+      location.hostname + '; SameSite=Lax';
+
+    document.cookie =
+      nombre + '=; Max-Age=0; path=/; SameSite=Lax';
+  });
+}
+
+function guardarCookies(aceptar) {
+  localStorage.setItem(
+    'pequefutbol_cookies',
+    aceptar ? 'aceptadas' : 'rechazadas'
+  );
+
+  if (!aceptar) {
+    gtag('consent', 'update', {
+      analytics_storage: 'denied'
+    });
+
+    eliminarCookiesAnalytics();
+  }
+
+  setTimeout(function() {
+    window.location.reload();
+  }, 300);
+}
+
+
+
+</script>
+
 </body></html>
