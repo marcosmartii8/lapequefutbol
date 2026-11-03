@@ -1173,10 +1173,6 @@ function activarAnalytics() {
   document.head.appendChild(script);
 }
 
-
-
-
-
 function eliminarCookiesAnalytics() {
   const nombres = document.cookie
     .split(';')
@@ -1186,14 +1182,22 @@ function eliminarCookiesAnalytics() {
     );
 
   nombres.forEach(nombre => {
-    document.cookie =
-      nombre + '=; Max-Age=0; path=/; domain=' +
-      location.hostname + '; SameSite=Lax';
+    const dominios = [
+      'ligapequefutbol.es',
+      'www.ligapequefutbol.es'
+    ];
+
+    dominios.forEach(dominio => {
+      document.cookie =
+        nombre + '=; Max-Age=0; path=/; domain=' +
+        dominio + '; SameSite=Lax';
+    });
 
     document.cookie =
       nombre + '=; Max-Age=0; path=/; SameSite=Lax';
   });
 }
+
 
 function guardarCookies(aceptar) {
   localStorage.setItem(
